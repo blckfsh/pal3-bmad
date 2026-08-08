@@ -447,6 +447,11 @@ Pal3 processes personal data of Philippine citizens and is subject to the Data P
 - **Asset:** USD-pegged stablecoin. No peso rail in V1 (§6.2).
 - **Trust Engine placement:** computed off-chain as service code, committed on-chain at consequence points, deliberately chain-agnostic so the mechanism remains portable if Pal3 later migrates to reach a peso rail.
 - **No verifiable randomness dependency.** Soroban has no native VRF, and the design removes the need for one — ordering is fully deterministic (FR-11).
+- **Open source.** All Soroban contracts are published under a permissive licence (Apache 2.0 or MIT) from first deployment. For a product asking people to escrow money with strangers, public, auditable contract source is part of the trust proposition, not a concession. `[ASSUMPTION: Apache 2.0 over MIT, for the explicit patent grant]`
+
+**Why Stellar, stated for the record.** The dependency is economic, not incidental. A ₱1,000-equivalent weekly Contribution cannot absorb meaningful transaction fees — a $0.50 fee on an ~$18 Contribution is close to 3% per Round, charged against a product whose proposition is that it costs less than the free alternative it replaces. Stellar's fee structure is what makes weekly micro-Contributions viable at all, and the NFR above is a direct consequence. Fast, predictable finality matters for the same reason: Rounds settle on fixed boundaries. The anchor network is additionally the realistic route to the Phase 2 peso rail.
+
+The Trust Engine is nonetheless built as portable service code (above). That is a deliberate risk hedge against the Phase 2 peso-rail dependency, not a statement that the chain is interchangeable — the contracts holding every peso of Member value are Soroban-native, and the unit economics do not work on a high-fee chain.
 
 ## 13. Open Questions
 
