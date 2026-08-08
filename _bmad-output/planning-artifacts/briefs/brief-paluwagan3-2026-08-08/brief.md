@@ -79,7 +79,7 @@ Three figures, deliberately kept apart.
 
 **The pain being priced.** Repa Paluwagan alone cost roughly **₱2B** across Davao and Bohol, against a continuing run of SEC advisories on OnPals schemes.
 
-> **[ASSUMPTION — needs your input]** The pilot-cohort figure is unset. Bound the beachhead by what V1 actually demands: urban, smartphone-owning, willing to hold a USD-pegged stablecoin for a full cycle.
+> **[ASSUMPTION — needs a defended number]** The reachable slice of that 32.96M is unset. Narrow it by what V1 actually demands: urban, smartphone-owning, and willing to hold a USD-pegged stablecoin for a full cycle. This is a sizing estimate for the deck, not an acquisition commitment — and it is a separate question from the pilot cohort below.
 
 ## Who This Serves
 
@@ -91,9 +91,13 @@ Three figures, deliberately kept apart.
 
 ## Revenue Model
 
-- **Platform:** SaaS subscription for underwriters, tiered by room count and fee caps. This keeps Pal3 out of the pooled-money flow entirely — software, not a financial counterparty.
+- **Platform:** SaaS subscription for underwriters. Tiers unlock **more concurrent rooms and greater per-room member capacity** — V1 rooms are capped at pilot scale, with larger rooms opening at higher tiers post-MVP. This keeps Pal3 out of the pooled-money flow entirely: software, not a financial counterparty.
 - **Underwriters:** per-contribution fees from members, the risk premium for insuring the room.
 - **Members:** no yield, by design.
+
+**Capacity tiers are a risk control, not only a paywall.** Room size drives underwriter exposure directly — more members means a larger pot, a longer cycle, and more default surface. Capping capacity by tier bounds how much risk any one underwriter can take on before they have demonstrated they can carry it, which is why the mechanism earns its place beyond monetisation.
+
+One design constraint follows, and it matters for regulatory posture: **capacity must be gated on demonstrated capital adequacy, not on subscription payment alone.** If a higher tier lets an underwriter open a large room without a correspondingly larger posted backstop, the platform is selling permission to take risk that members ultimately bear. Tie the unlock to posted backstop capital and the tier becomes a feature licence sitting on top of a solvency check — defensible to a regulator, and honest to members.
 
 That last line is a regulatory position, not an oversight. The SEC's objection to OnPals is the *promised return* — 10% to 757% — which is what makes them investment contracts. Pal3 promises members nothing beyond their own money back on schedule. Member-side exposure is therefore structurally near-zero, and the investment-contract question attaches only to the underwriter relationship.
 
@@ -139,6 +143,17 @@ Sequenced against the SCF #45 round cadence. Rounds run roughly every six weeks,
 **Specified but not implemented for the demo:** production KYC/AML (mocked), underwriter subscription and onboarding (backstop present as a pre-funded pool), multi-room trust-graph effects, dispute resolution.
 
 **Out of scope until Phase 2:** migration to a regulated peso rail, fiat on/off-ramps, open public enrolment. **Out until later:** multi-currency, employer-sponsored tier, subscription billing, dispute-resolution UI, legal recovery flow, secondary markets for trust or positions.
+
+## The Pilot Cohort
+
+Deliberately small, and not a user-acquisition exercise. One room, completing one cycle, proves the mechanism.
+
+- **Size:** 5–10 members — the size of a real paluwagan room.
+- **Cadence:** weekly. This is a scheduling decision, not a preference: a 5–10 member room at weekly cadence completes a full cycle in 5–10 weeks, while a monthly cadence would take 5–10 months and push the T3 milestone past any reasonable horizon.
+- **Recruitment:** personal network — officemates, family, friends, an organised barangay group. Members join on informed terms, including the USD-peg exposure.
+- **One underwriter**, which for the pilot may be the founder, so the two-sided cold start does not gate the first cycle.
+
+**What this is really testing.** Not whether Pal3 can scale, but whether people will accept a small fee for a paluwagan that cannot collapse. If twelve people who already know and trust the founder will not join, that is decisive early evidence at near-zero cost — which is the point of running a pilot rather than a launch.
 
 ## Success Criteria
 

@@ -17,6 +17,8 @@ Depth that belongs downstream (PRD, architecture, solution design) or earned a p
 - Slashing: full stake on first miss, or graduated? Any cure period?
 - Can a defaulter rehabilitate a score, and over what horizon?
 - Sybil resistance beyond KYC — what stops one human, several identities?
+- **Capacity-tier binding.** Room capacity unlocks by underwriter subscription tier post-MVP. What is the formula binding capacity to posted backstop capital, so a tier upgrade cannot outrun solvency? What happens to an in-flight room if an underwriter downgrades or lapses mid-cycle?
+- **Payout position in large rooms.** Trust-ranked ordering is low-stakes in a 5-member room and high-stakes in a 50-member one, where last position means waiting most of a year. Does ordering need a fairness floor — a cap on consecutive late placements across cycles — once rooms scale?
 
 ## 2. Regulatory risk register (Philippines)
 
