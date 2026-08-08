@@ -160,12 +160,12 @@ Reading the arrows: nothing points *from* a contract *to* an off-chain service. 
 | --- | --- |
 | soroban-sdk | 25.0.0 |
 | Rust | 1.84+ (target `wasm32v1-none`) |
-| stellar-cli | `[ASSUMPTION: pin the installed version at project setup — provides `contract build` and `contract bindings`]` |
+| stellar-cli | [ADOPTED] — provides `contract build` and `contract bindings`. Record the installed version at project setup. |
 | Stellar network | Testnet → Mainnet |
-| @stellar/stellar-sdk | `[ASSUMPTION: pin at install — version not verified at authoring]` |
-| Stellar Wallets Kit | `[ASSUMPTION: pin at install]` — viable **only under AD-15**; its WalletConnect module exposes `signXDR` and `signAndSubmitXDR` but not `signAuthEntry` |
-| TypeScript / Node | `[ASSUMPTION: one language across services and client, to limit context-switching for a solo build]` |
-| PostgreSQL | `[ASSUMPTION: read models only — rebuildable, not authoritative]` |
+| @stellar/stellar-sdk | [ADOPTED] — pin the version at install; not verified at authoring. |
+| Stellar Wallets Kit | [ADOPTED] — pin at install. Viable **only under AD-15**: its WalletConnect module exposes `signXDR` and `signAndSubmitXDR` but not `signAuthEntry`, so any entry point requiring detached auth would fall outside the kit. |
+| TypeScript / Node | [ADOPTED] — off-chain services and client. One toolchain outside the contracts; generated bindings are TypeScript already. |
+| PostgreSQL | `[ASSUMPTION: read models only — rebuildable, not authoritative. Any store satisfying AD-1 would do; nothing else in the spine depends on the choice.]` |
 
 ## Structural Seed
 
