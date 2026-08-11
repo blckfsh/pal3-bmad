@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pal3 — Room terms / Commit</title>
+<style>
+/*
+  GOVERNED BY:
+  DESIGN.md § Colors, § Typography, § Layout & Spacing, § Elevation & Depth,
+             § Shapes, § Components (terms-row, amount-display, disclosure-block,
+             button-primary, trust-score-panel), § Do's and Don'ts
+  EXPERIENCE.md § Information Architecture (Room terms, Commit)
+                § Money Legibility  — dollar of record, meta peso, attribution rule
+                § Irreversibility & Commitment — the 5-step commit pattern, commit-gap,
+                  no confirmation dialog, act+amount button label
+                § Voice and Tone — plain language, honest mechanics
+                § Accessibility Floor — AAA on FX disclosure, 48dp targets, focus order
+                § Key Flows — Flow 1 steps 5-8
+  STATES SHOWN: (A) Room terms, FX unacknowledged, commit disabled
+                (B) Commit, acknowledged and funded, commit enabled
+  All strings traced to .memlog.md voice rules. Figures from PRD FR-13/FR-20/FR-22
+  worked example: $18.00 weekly, 8 members, trust score 400, stake 1.6x.
+*/
+:root{
+  --surface-base:#F6F6F3; --surface-raised:#FFFFFF; --surface-sunken:#EDEDE8;
+  --ink-primary:#16181C; --ink-secondary:#5A6068; --ink-disabled:#9AA0A7; --ink-inverse:#FFFFFF;
+  --accent:#124F4B; --accent-pressed:#0D3B38;
+  --border-hairline:#E2E3DE; --border-strong:#C7C9C2;
+  --state-paid:#2E6B4F; --state-grace:#A5701A; --state-default:#96272B;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-full:9999px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --commit-gap:32px;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#DEDFDA;font-family:var(--font);color:var(--ink-primary);
+     padding:40px 20px;display:flex;gap:40px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.stage{display:flex;flex-direction:column;gap:12px;align-items:center}
+.stage-label{font-size:13px;line-height:18px;color:#4A4E54;max-width:390px;text-align:center}
+.stage-label b{font-weight:600;color:#16181C}
+/* device frame */
+.phone{width:390px;height:844px;background:var(--surface-base);border-radius:38px;
+       border:10px solid #1B1D21;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;
+           padding:0 var(--s5);font-size:13px;font-weight:600;color:var(--ink-primary)}
+.navbar{height:52px;flex:none;display:flex;align-items:center;gap:var(--s3);
+        padding:0 var(--s4);border-bottom:1px solid var(--border-hairline);background:var(--surface-base)}
+.navbar .back{width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+              margin-left:-12px;color:var(--ink-primary);font-size:20px}
+.navbar h1{font-size:16px;font-weight:600;line-height:24px}
+.scroll{flex:1;overflow-y:auto;padding:var(--s5) var(--s4) 0}
+.footer{flex:none;padding:var(--s4);padding-bottom:var(--s5);background:var(--surface-base);
+        border-top:1px solid var(--border-hairline)}
+
+/* type roles */
+.t-title{font-size:22px;font-weight:600;line-height:28px;letter-spacing:-.01em}
+.t-body{font-size:16px;line-height:24px}
+.t-body-strong{font-size:16px;font-weight:600;line-height:24px}
+.t-meta{font-size:13px;line-height:18px}
+.t-amount{font-size:28px;font-weight:600;line-height:34px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.t-amount-inline{font-size:16px;font-weight:600;line-height:24px;font-variant-numeric:tabular-nums}
+.t-display{font-size:32px;font-weight:600;line-height:38px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sec{color:var(--ink-secondary)}
+
+/* components */
+.card{background:var(--surface-raised);border:1px solid var(--border-hairline);
+      border-radius:var(--r-lg);padding:var(--s4)}
+.section-head{font-size:13px;line-height:18px;font-weight:600;color:var(--ink-secondary);
+              margin:var(--s6) 0 var(--s2)}
+.terms-row{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s4);
+           padding:var(--s3) 0;border-bottom:1px solid var(--border-hairline)}
+.terms-row:last-child{border-bottom:0}
+.terms-row .label{font-size:16px;line-height:24px;color:var(--ink-secondary)}
+.terms-row .value{text-align:right}
+.terms-row .value .sub{font-size:13px;line-height:18px;color:var(--ink-secondary);
+                       font-variant-numeric:tabular-nums;font-weight:400}
+.disclosure{background:var(--surface-sunken);border-radius:var(--r-md);
+            padding:var(--s4);font-size:13px;line-height:18px;color:var(--ink-primary)}
+.disclosure p+p{margin-top:var(--s3)}
+.waterfall{list-style:none;counter-reset:w;margin-top:var(--s2)}
+.waterfall li{position:relative;padding-left:22px;margin-top:var(--s2)}
+.waterfall li::before{counter-increment:w;content:counter(w) ".";position:absolute;left:0;
+                      font-variant-numeric:tabular-nums;color:var(--ink-secondary)}
+.ack{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s4) 0 0}
+.box{width:24px;height:24px;flex:none;border:1.5px solid var(--border-strong);
+     border-radius:var(--r-sm);background:var(--surface-raised);margin-top:1px}
+.box.on{background:var(--accent);border-color:var(--accent);color:#fff;
+        display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.btn{width:100%;min-height:52px;border:0;border-radius:var(--r-md);
+     font-family:var(--font);font-size:16px;font-weight:600;line-height:24px;
+     display:flex;align-items:center;justify-content:center;padding:0 var(--s5)}
+.btn-primary{background:var(--accent);color:var(--ink-inverse)}
+.btn-primary[disabled]{background:var(--surface-sunken);color:var(--ink-disabled)}
+.blocker{font-size:13px;line-height:18px;color:var(--ink-secondary);
+         text-align:center;margin-top:var(--s2)}
+.score-panel{background:var(--surface-raised);border:1px solid var(--border-hairline);
+             border-radius:var(--r-lg);padding:var(--s4)}
+.track{height:6px;border-radius:var(--r-full);background:var(--surface-sunken);
+       margin:var(--s3) 0 var(--s3);overflow:hidden}
+.track i{display:block;height:100%;width:40%;background:var(--accent);border-radius:var(--r-full)}
+.commit-gap{height:var(--commit-gap)}
+.pot{padding:var(--s5) 0 var(--s4);text-align:left}
+.pot .lead{font-size:13px;line-height:18px;color:var(--ink-secondary)}
+.pot .peso{font-size:13px;line-height:18px;color:var(--ink-secondary);
+           font-variant-numeric:tabular-nums;margin-top:2px}
+.rule{height:1px;background:var(--border-hairline);margin:var(--s5) 0}
+.pending{display:flex;gap:var(--s3);align-items:center;padding:var(--s3) 0}
+.dot{width:8px;height:8px;border-radius:var(--r-full);background:var(--ink-secondary);flex:none}
+</style>
+</head>
+<body>
+
+<!-- ============ STATE A — Room terms, FX unacknowledged ============ -->
+<div class="stage">
+  <div class="phone">
+    <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+    <div class="navbar"><div class="back">‹</div><h1>Room terms</h1></div>
+    <div class="scroll">
+
+      <div class="pot">
+        <div class="lead">You'll receive</div>
+        <div class="t-amount">$144.00</div>
+        <div class="peso">≈ ₱8,150 · rate as of 11 Aug, 9:41</div>
+        <div class="t-body sec" style="margin-top:8px">on Monday, 6 October — round 6 of 8.</div>
+      </div>
+
+      <div class="section-head">WHAT YOU PAY</div>
+      <div class="card" style="padding:0 var(--s4)">
+        <div class="terms-row"><div class="label">Every week</div>
+          <div class="value"><div class="t-amount-inline">$18.00</div><div class="sub">≈ ₱1,019</div></div></div>
+        <div class="terms-row"><div class="label">Stake, locked now</div>
+          <div class="value"><div class="t-amount-inline">1.6× · $28.80</div><div class="sub">returned when the room closes</div></div></div>
+        <div class="terms-row"><div class="label">Marivic's fee</div>
+          <div class="value"><div class="t-amount-inline">2% · $0.36</div><div class="sub">per week, never from your payout</div></div></div>
+        <div class="terms-row"><div class="label">Due today</div>
+          <div class="value"><div class="t-amount-inline">$46.80</div><div class="sub">stake + first week</div></div></div>
+      </div>
+
+      <div class="section-head">THE ROOM</div>
+      <div class="card" style="padding:0 var(--s4)">
+        <div class="terms-row"><div class="label">Members</div>
+          <div class="value"><div class="t-amount-inline">8</div></div></div>
+        <div class="terms-row"><div class="label">Rounds</div>
+          <div class="value"><div class="t-amount-inline">8 · weekly</div></div></div>
+        <div class="terms-row"><div class="label">Your payout position</div>
+          <div class="value"><div class="t-amount-inline">6th</div><div class="sub">frozen when the room starts</div></div></div>
+      </div>
+
+      <div class="section-head">YOUR SCORE SET YOUR STAKE</div>
+      <div class="score-panel">
+        <div class="t-display">400</div>
+        <div class="track"><i></i></div>
+        <div class="t-body">Your stake is 1.6× one contribution. A higher score means a smaller stake in your next room.</div>
+      </div>
+
+      <div class="section-head">IF YOU CAN'T PAY ONE WEEK</div>
+      <div class="disclosure">
+        <ol class="waterfall">
+          <li>You get 48 hours to pay. Nobody else is affected, and the round waits.</li>
+          <li>If you still haven't paid, $18.00 is taken from your stake and your score drops 150 points. This stays on your record.</li>
+          <li>If your stake runs out, you leave the room. If you haven't been paid yet, you don't get paid.</li>
+        </ol>
+        <p>Whoever is due that week gets the full $144.00 on time, in every case. Marivic covers anything your stake can't.</p>
+      </div>
+
+      <div class="section-head">HELD IN US DOLLARS</div>
+      <div class="disclosure">
+        <p>Your money is held in US dollars, not pesos. The peso amounts on this screen are estimates at today's rate. What the peso value will be on 6 October, nobody can say — it may be more or less than ₱8,150.</p>
+      </div>
+
+      <div class="ack">
+        <div class="box"></div>
+        <div class="t-body">I understand my money is held in US dollars and the peso value can change before my payout.</div>
+      </div>
+
+      <div class="commit-gap"></div>
+    </div>
+    <div class="footer">
+      <button class="btn btn-primary" disabled>Lock $46.80 and join</button>
+      <div class="blocker">Confirm the dollar notice above to continue.</div>
+    </div>
+  </div>
+  <div class="stage-label"><b>A · Room terms, unacknowledged.</b> Payout leads, cost follows, consequences before the control. FX disclosure at full ink, never greyed. Commit disabled with the blocker stated in text, not a tooltip.</div>
+</div>
+
+<!-- ============ STATE B — Commit, funded and acknowledged ============ -->
+<div class="stage">
+  <div class="phone">
+    <div class="statusbar"><span>9:42</span><span>▮▮▮</span></div>
+    <div class="navbar"><div class="back">‹</div><h1>Join this room</h1></div>
+    <div class="scroll">
+
+      <div class="pot">
+        <div class="lead">You're about to lock</div>
+        <div class="t-amount">$46.80</div>
+        <div class="peso">≈ ₱2,649 · rate as of 11 Aug, 9:42</div>
+      </div>
+
+      <div class="card" style="padding:0 var(--s4)">
+        <div class="terms-row"><div class="label">Stake</div>
+          <div class="value"><div class="t-amount-inline">$28.80</div></div></div>
+        <div class="terms-row"><div class="label">First week</div>
+          <div class="value"><div class="t-amount-inline">$18.00</div></div></div>
+        <div class="terms-row"><div class="label">Your balance after</div>
+          <div class="value"><div class="t-amount-inline">$63.20</div><div class="sub">enough for 3 more weeks</div></div></div>
+      </div>
+
+      <div class="rule"></div>
+
+      <div class="t-body-strong">You'll get $144.00 on Monday, 6 October.</div>
+      <div class="t-body sec" style="margin-top:var(--s2)">
+        Nothing can change that date — not Marivic, not Pal3, not us. The money is held by the contract until then.
+      </div>
+
+      <div class="section-head">BEFORE YOU SIGN</div>
+      <div class="disclosure">
+        <p>This can't be undone. Once you sign, your $46.80 is locked and you're committed to eight weekly payments of $18.00.</p>
+        <p>If you miss one, you have 48 hours. After that, $18.00 comes out of your stake and your score drops 150 points — permanently.</p>
+      </div>
+
+      <div class="ack">
+        <div class="box on">✓</div>
+        <div class="t-body">I understand my money is held in US dollars and the peso value can change before my payout.</div>
+      </div>
+
+      <div class="pending">
+        <div class="dot"></div>
+        <div class="t-meta sec">You'll approve this once in your wallet app, then come back here.</div>
+      </div>
+
+      <div class="commit-gap"></div>
+    </div>
+    <div class="footer">
+      <button class="btn btn-primary">Lock $46.80 and join</button>
+    </div>
+  </div>
+  <div class="stage-label"><b>B · Commit, funded and acknowledged.</b> The 5-step pattern: what you give up, what you get and when, what happens if you can't pay, <b>commit-gap</b>, then one action labelled with act and amount. No confirmation dialog — this screen is the safeguard. The WalletConnect round trip is announced before it happens.</div>
+</div>
+
+</body>
+</html>
