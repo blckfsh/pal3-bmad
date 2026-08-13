@@ -7,7 +7,7 @@ paradigm: 'Ledger-authoritative hexagonal — contracts are the system of record
 scope: 'Pal3 V1 pilot — Registry, Factory and Room contracts on Stellar/Soroban, the off-chain trust and indexing services, and the member/underwriter PWA'
 status: final
 created: '2026-08-08'
-updated: '2026-08-08'
+updated: '2026-08-12'
 binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23]
 sources:
   - '_bmad-output/planning-artifacts/prds/prd-paluwagan3-2026-08-08/prd.md'
@@ -24,7 +24,7 @@ companions: []
 | Layer | Namespace | Role |
 | --- | --- | --- |
 | Domain (authoritative) | `contracts/` | Registry, Factory, Room — Rust/Soroban |
-| Read adapters | `services/indexer/` | Chain events → read models |
+| Read adapters | `services/indexer/`, `services/rates/` | Chain events → read models; published FX rate → cached presentational rate |
 | Write adapters | `services/trust/`, `services/kyc/` | Compute and submit; never authoritative |
 | Query port | `services/api/` | Serves read models to clients |
 | Client | `app/` | Mobile-first PWA |
@@ -121,6 +121,18 @@ companions: []
 - **Prevents:** the mobile surface becoming unbuildable. Soroban's `signAuthEntry` path is not exposed by Stellar Wallets Kit's WalletConnect module, so a design requiring separate auth entries would force a bespoke WalletConnect integration on the product's primary surface.
 - **Rule:** Contract entry points are designed so the address being authorized is the transaction source account — a single `require_auth` on the invoker, satisfied by signing the transaction itself. No entry point may require a Member to sign a detached authorization entry. Multi-party authorization within one invocation is prohibited in V1.
 
+### AD-16 — Fiat conversion is presentational, attributed, and never authoritative
+
+- **Binds:** FR-22, FR-8, FR-12, FR-13
+- **Prevents:** a peso figure being mistaken for the amount of record, or two Members seeing different conversions of the same commitment; and a display concern leaking into a contract decision.
+- **Rule:** The dollar amount is the value of record everywhere. A read-only **rate adapter** fetches and caches a published USD/PHP rate and serves it through the API alongside its **source identifier and observation timestamp**; no peso figure may be rendered without both. **The API is the client's only source of a rate** — no client fetches a rate provider directly, so two Members never see different conversions of the same commitment. **Freshness is decided in one place:** the API omits the rate entirely when it falls outside the freshness window, so a client that receives no rate has nothing to decide and renders no peso line. The rate is never written on-chain, never passed to a contract, and never used to compute a Contribution, Stake, Pot, Slash, or fee. Rate-adapter unavailability degrades presentation only and must never block a join, Contribution, or Payout.
+
+### AD-17 — Member handle is derived from the address, never stored
+
+- **Binds:** FR-5, FR-9, AD-10
+- **Prevents:** a display name becoming a second identity system — an authoritative off-chain store that AD-1 forbids, plus a uniqueness and impersonation surface in a UI where two Members must never be confusable.
+- **Rule:** A Member's handle is a pure deterministic function of their Stellar address. **The derivation exists exactly once** — as a single shared module consumed by the client and the indexer alike; a second implementation, however faithful, is a defect, because two conforming derivations still produce two names for one person. It is not chosen by the Member, not stored in any authoritative record, and not settable or changeable. The derivation is published so any observer can reproduce it, and it introduces no personal data — the handle is a projection of the address, nothing more.
+
 ### Dependency direction
 
 ```mermaid
@@ -153,6 +165,8 @@ Reading the arrows: nothing points *from* a contract *to* an off-chain service. 
 | Events | Every state transition that moves value or changes a Trust Score emits an event. The indexer is built only from events — never from state polling — so read models stay replayable. |
 | Trust Score | Computed off-chain as a pure function of chain event history (AD-1). The same event sequence must always yield the same score; the function is versioned and its version recorded with each commit. |
 | Config | Contract addresses and network passphrase come from environment at build/deploy; never hard-coded in client or service source. |
+| Handles | A Member is displayed by a handle derived deterministically from their Stellar address (AD-17), by one shared module that client and indexer both consume. A second implementation is a defect. |
+| Fiat display | Dollar amounts are the value of record. A peso figure is always secondary, always carries its rate source and observation timestamp, and is omitted rather than shown stale (AD-16). |
 
 ## Stack
 
@@ -165,7 +179,9 @@ Reading the arrows: nothing points *from* a contract *to* an off-chain service. 
 | @stellar/stellar-sdk | [ADOPTED] — pin the version at install; not verified at authoring. |
 | Stellar Wallets Kit | [ADOPTED] — pin at install. Viable **only under AD-15**: its WalletConnect module exposes `signXDR` and `signAndSubmitXDR` but not `signAuthEntry`, so any entry point requiring detached auth would fall outside the kit. |
 | TypeScript / Node | [ADOPTED] — off-chain services and client. One toolchain outside the contracts; generated bindings are TypeScript already. |
+| React + Vite + `vite-plugin-pwa` | [ADOPTED] — the `app/` client. Chosen 2026-08-12; pin versions at install. The wallet library imposed no constraint (Stellar Wallets Kit is web-component based and framework-agnostic), so this is an ecosystem-familiarity call, not a technical one. `vite-plugin-pwa` supplies the service worker and manifest; the Create React App PWA template is deprecated. No SSR — the client is fully client-side against chain and API. |
 | PostgreSQL | `[ASSUMPTION: read models only — rebuildable, not authoritative. Any store satisfying AD-1 would do; nothing else in the spine depends on the choice.]` |
+| FX rate provider | `[ASSUMPTION: a published USD/PHP source, not yet selected. Presentational only under AD-16, so the choice binds nothing else in the spine; select before Story 2.8.]` |
 
 ## Structural Seed
 
@@ -182,21 +198,25 @@ graph LR
         TRUST["Trust service"]
         KYCA["KYC adapter"]
         IDX["Indexer"]
+        RATES["Rate adapter<br/>presentational only"]
         API["API"]
         DB[("Read models")]
     end
     PWA["Member + Underwriter PWA"]
     PROV["KYC provider"]
+    FX["FX rate provider"]
 
     PWA -->|"invoke via WalletConnect"| RM
     PWA -->|read| API
     API --> DB
+    API --> RATES
     IDX -->|events| DB
     IDX --> REG
     IDX --> RM
     TRUST --> REG
     KYCA --> REG
     PROV -->|webhook| KYCA
+    FX -->|"rate + timestamp"| RATES
     FAC -->|deploys| RM
     RM -->|reads scores| REG
 ```
@@ -231,8 +251,11 @@ pal3/
     trust/           # score computation from chain events; commits to Registry
     kyc/             # provider webhook -> attestation issuance
     indexer/         # chain events -> read models
+    rates/           # cached USD/PHP rate + source and timestamp; presentational only
     api/             # read-only query surface for the client
-  app/               # mobile-first PWA, WalletConnect
+  app/               # mobile-first PWA — React + Vite, WalletConnect
+  shared/            # the single implementation of cross-cutting derivations (handle, AD-17);
+                     # consumed by app/ and services/ — never reimplemented in either
   bindings/          # GENERATED TypeScript contract clients — never hand-edited
 ```
 
@@ -247,6 +270,8 @@ pal3/
 | FR-14…FR-17 Default waterfall | `contracts/room` | AD-4, AD-9, AD-11 |
 | FR-18…FR-20 Capacity, adequacy, fees | `contracts/factory`, `contracts/room` | AD-2, AD-6, AD-14 |
 | FR-21…FR-23 Member application | `app/`, `bindings/`, `services/api` | AD-1, AD-7, AD-8, AD-15 |
+| Fiat display (cross-cutting) | `services/rates` → `services/api` → `app/` | AD-7, AD-16 |
+| Member identification in UI (cross-cutting) | `app/`, `services/indexer` | AD-10, AD-17 |
 | Round liveness (cross-cutting) | `contracts/room`, optional keeper | AD-4, AD-13 |
 
 ## Deferred
@@ -257,3 +282,5 @@ pal3/
 - **Fee accrual mechanics.** Whether the Underwriter fee accrues per Contribution in-contract or is settled at Cycle close. Both variants are local to the Room contract and to FR-20's build, so neither can cause two components to diverge. Deferred to the FR-20 build.
 - **Multi-Room trust-graph effects.** Structurally absent in V1 (one Room). Deferred to the second cohort.
 - **Key management for the trust service.** The Registry-writing key is an operational concern with no V1 answer beyond a single operator key. *Revisit before any third-party Underwriter onboards.*
+- **FX rate provider and freshness window.** AD-16 fixes that a peso figure always carries a source and timestamp, that the API is the only source of a rate, and that the API alone decides staleness. It does not name the provider or the threshold value. Neither can cause divergence now that the decision has one home — the provider is presentational, and the threshold is a single number in a single layer, a UX judgement owed to the UX spine. *Revisit before the terms screen is built.*
+- **Handle derivation function.** AD-17 fixes that the handle is a pure, published function of the address living in exactly one shared module. The specific encoding — short code, word pair, or other — is a legibility decision for the UX spine, not an invariant, and cannot diverge because only one implementation exists. *Revisit before the Members surface is built.*

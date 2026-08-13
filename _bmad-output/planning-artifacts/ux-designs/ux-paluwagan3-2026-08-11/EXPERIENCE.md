@@ -3,9 +3,10 @@ name: Pal3
 description: Information architecture, behavior, states, and flows for the Pal3 V1 pilot — member app and role-gated underwriter surfaces.
 status: final
 created: 2026-08-11
-updated: 2026-08-11
+updated: 2026-08-12
 sources:
   - "{planning_artifacts}/prds/prd-paluwagan3-2026-08-08/prd.md"
+  - "{planning_artifacts}/architecture/architecture-paluwagan3-2026-08-08/ARCHITECTURE-SPINE.md"
 ---
 
 # Pal3 — Experience Spine
@@ -20,7 +21,11 @@ Member and underwriter are the same application, role-gated: after wallet connec
 
 English only. Light mode only. `DESIGN.md` is the visual identity reference.
 
-No UI system is named in the PRD or architecture. `[ASSUMPTION]` Both spines therefore specify from first principles rather than as a delta over shadcn/MUI/other. If a system is chosen before build, this section is where that inheritance gets recorded and the component tables below collapse to deltas.
+**Implementation substrate, adopted 2026-08-12:** React + Vite + `vite-plugin-pwa`. This is a rendering framework and a build tool — it supplies no components, so nothing in this spine inherits from it and the component tables below stay absolute rather than collapsing to deltas.
+
+**No component system is adopted, decided 2026-08-12.** shadcn, MUI, Radix, and React Aria were all considered and declined: the visual language is deliberately sparse — no shadows, one accent, outline-only pills — so a styled library's defaults would be overridden on nearly every component, and headless primitives were judged not worth the dependency for eleven components.
+
+That decision moves real work onto the build, and this spine records it rather than leaving it implicit: **focus traversal, ARIA wiring, dialog semantics, and the `aria-live` grace banner are hand-built.** The Accessibility Floor below is therefore a build risk carried by a solo developer, not a property inherited from tested primitives. It is the section most likely to be quietly under-delivered under time pressure, and the one to check first if the eight-week window tightens.
 
 ## Information Architecture
 
@@ -78,7 +83,9 @@ Numbers are never rounded in commitment copy. "About ₱1,000" is acceptable for
 
 - **The dollar figure is the number of record**, everywhere, always. It is what the contract holds and what the member signs.
 - **An indicative peso line may appear beneath it** in `{typography.meta}`, always prefixed `≈`, never inside a button label, never on the FX acknowledgement itself. Decided 2026-08-11: comprehension for a cohort that thinks in pesos outweighs the risk of implying a stability the product disclaims — on the condition that the attribution rule below is honored without exception.
-- **The peso rate source and its timestamp are stated** wherever a peso figure appears on a commitment surface. An unattributed conversion is a promise.
+- **The peso rate source and its timestamp are stated** on every commitment surface carrying a peso figure. Attribution is stated **once per surface, beneath the primary amount, and governs every peso figure on that surface** — repeating it on each terms row would be noise, but a surface with no attribution anywhere shows no peso figures at all. An unattributed conversion is a promise. Both parts are required: a timestamp without a named source is not attribution.
+- **A peso line is never stale.** The freshness window is **one hour** (decided 2026-08-12). Per `ARCHITECTURE-SPINE.md` AD-16 the API omits an out-of-window rate entirely, so the client receives nothing and renders no peso line — the decision lives in one layer and the UI never has to judge it. One hour was chosen over tighter windows because a comprehension aid that intermittently vanishes on a poor connection is worse than one slightly behind but reliably present; members must never be trained to expect it missing.
+- **When the peso line is absent, nothing takes its place.** No placeholder, no "rate unavailable" copy, no dash. The dollar figure is the number of record and stands alone perfectly well — an error string beside an amount would imply something is wrong with the amount.
 - **Four amounts must never be confusable** and are always labeled with their own noun: *contribution* (what you pay each round), *stake* (locked collateral, returned at close), *pot* (what you receive on your round), *fee* (what the underwriter earns per contribution).
 - **The pot is always shown as its full value with no deduction**, because FR-12 and FR-20 guarantee exactly that. Any UI that shows a "net" payout would misrepresent the product.
 - **Stake is always shown as a multiple and an amount together** — "1.6× one contribution — $28.80" — because the multiple is what the trust score controls and the amount is what leaves the wallet.
@@ -126,11 +133,12 @@ Behavioral. Visual specs live in `DESIGN.md § Components`.
 | Amount display | Commit surfaces, payout, pot | Dollar primary, indicative peso secondary. Never animates or counts up. |
 | Status pill | Members list, schedule, underwriter room | Text carries the state; color reinforces. Four states only: paid, pending, in grace, defaulted. |
 | Schedule row | Room home, cycle summary | Tap → round detail. Current round marked; member's own round set strong. Never reorders — position is frozen at start (FR-6, FR-11). |
-| Member status row | Members | Handle only. No avatar, no name, no photo — the product does not hold legal identity and must not imply it does. |
+| Member status row | Members | Handle only. No avatar, no name, no photo — the product does not hold legal identity and must not imply it does. The handle is a short alphanumeric code derived from the wallet address (AD-17), identical everywhere it appears, never chosen or changed by the member, and never accompanied by copy implying it is a name. |
 | Trust score panel | Trust, room terms | Score + fill + consequence, never fewer than all three. |
 | Notice banner | Room home | Two variants: grace (own or another member's) and default-resolved. Persistent, not dismissible, cleared by state change only. |
 | Disclosure block | Room terms, commit | Full ink, never collapsed behind "read more", never scrolled past silently — the commit control stays disabled until the FX acknowledgement is checked (FR-22). |
-| Primary action | One per surface | Labeled with act + amount on any funding action. Disabled state states the blocker in text beneath it, never as a tooltip. |
+| Button (primary) | One per surface | Labeled with act + amount on any funding action. Disabled state states the blocker in text beneath it, never as a tooltip. |
+| Button (secondary) | Beside a primary action, or alone on a navigational surface | Never commits funds and never carries an amount in its label. Used for "not now" and for leaving a commitment surface without acting. Never styled or placed to compete with the primary action, and never the only control on a surface that has something to commit. |
 | Signing handoff | Any transaction | See § Interaction Primitives. |
 
 ## State Patterns
@@ -138,6 +146,9 @@ Behavioral. Visual specs live in `DESIGN.md § Components`.
 | State | Surface | Treatment |
 |---|---|---|
 | Unauthenticated | Welcome | Four lines and one action. No marketing scroll. |
+| **Trust score, no history yet** | Trust score | The state every member is in at pilot start, and the surface SM-5 measures. Score and its consequence render normally; the history area states plainly that nothing has moved the score yet and names the first thing that will — the next on-time contribution. Never an illustration, never an encouragement. |
+| Activity, nothing yet | Activity | A member who has taken no on-chain action. One line stating that actions will appear here once they act. No placeholder rows. |
+| Applicants, none yet | Applicants | An underwriter whose room has opened admission but drawn no requests. States that admission is open and how many members the room still needs — the useful fact, not "no results". |
 | Wallet connected, unverified | Verify identity | What verification is for, who holds the documents, what Pal3 never sees (FR-1). |
 | Verification pending | Verification status | Provider is working. No countdown Pal3 can't honor. App remains usable; joining is blocked with the reason stated. |
 | Verification failed / duplicate | Verification status | State the outcome and the provider's remedy path. Pal3 offers no appeal, and says so rather than implying one exists (FR-3). |
@@ -189,7 +200,9 @@ Behavioral. Visual contrast is `DESIGN.md`'s responsibility.
 - **Text scales with browser font-size settings to 200%** without truncating any amount, date, or control label. The schedule is the hardest case and is the one to test.
 - **Focus traversal follows reading order** on every surface; the commit control is always last in order, after the disclosure it depends on.
 - **No motion carries meaning.** Nothing in the product requires perceiving an animation, so `prefers-reduced-motion` degrades to no visible change.
-- **Contrast floor is WCAG AA at minimum**, and the FX disclosure and grace banner are held to AAA body text — they are the two strings a member most needs to read and most likely reads in poor conditions.
+- **Contrast floor is WCAG AA at minimum**, and the FX disclosure and grace banner are held to AAA body text — they are the two strings a member most needs to read and most likely reads in poor conditions. Measured ratios for every load-bearing pair are recorded in `DESIGN.md § Colors`; the commitment in this line is unverifiable without them, and the reviewer gate of 2026-08-12 found a grace colour that failed AA precisely because no numbers were on record.
+- **Handles must survive a bad screen.** The code excludes `0`/`O` and `1`/`I`, is grouped rather than run together, and is set in tabular figures — a member comparing two handles is comparing characters, not reading a word. Screen readers announce it character by character, never as an attempted word.
+- **Everything in this section is hand-built** (see § Foundation). No accessible component library underpins it, so each requirement here needs its own verification rather than being assumed from a primitive's behavior.
 
 ## Responsive & Platform
 

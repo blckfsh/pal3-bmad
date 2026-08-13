@@ -3,9 +3,10 @@ name: Pal3
 description: Mobile-first savings-circle app for a Philippine pilot cohort. Calm, institutional, light-only. Money is legible before it is beautiful.
 status: final
 created: 2026-08-11
-updated: 2026-08-11
+updated: 2026-08-12
 sources:
   - "{planning_artifacts}/prds/prd-paluwagan3-2026-08-08/prd.md"
+  - "{planning_artifacts}/architecture/architecture-paluwagan3-2026-08-08/ARCHITECTURE-SPINE.md"
 colors:
   surface-base: '#F6F6F3'
   surface-raised: '#FFFFFF'
@@ -19,7 +20,7 @@ colors:
   border-hairline: '#E2E3DE'
   border-strong: '#C7C9C2'
   state-paid: '#2E6B4F'
-  state-grace: '#A5701A'
+  state-grace: '#6B4710'
   state-default: '#96272B'
   state-grace-wash: '#FBF3E2'
   state-default-wash: '#FAEDED'
@@ -63,6 +64,13 @@ typography:
     fontSize: '16px'
     fontWeight: '600'
     lineHeight: '24px'
+    fontVariantNumeric: 'tabular-nums'
+  handle:
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    fontSize: '16px'
+    fontWeight: '500'
+    lineHeight: '24px'
+    letterSpacing: '0.04em'
     fontVariantNumeric: 'tabular-nums'
 rounded:
   DEFAULT: '8px'
@@ -124,7 +132,7 @@ components:
     paddingX: '{spacing.4}'
     markerWidth: '3px'
   member-status-row:
-    handleTypography: '{typography.body}'
+    handleTypography: '{typography.handle}'
     statusTypography: '{typography.meta}'
     paddingY: '{spacing.3}'
     divider: '1px solid {colors.border-hairline}'
@@ -175,7 +183,20 @@ The palette is deliberately small: two neutral surfaces, three ink weights, one 
 - **Sunken (`#EDEDE8`)** backs disclosure blocks and inert tracks. It reads as "this is the record, not an action."
 - **Ink (`#16181C` / `#5A6068` / `#9AA0A7`)** is the three-step text ramp. Amounts and member-facing decisions are always at full ink; supporting labels sit at secondary; disabled is reserved for genuinely unavailable controls, never for de-emphasis.
 - **Deep Teal (`#124F4B`)** is the only chromatic brand color, and it means *commitment*: the primary action, the trust-score fill, the active round marker. It is never used for decoration, never as a background wash, and never for status.
-- **Paid (`#2E6B4F`)**, **Grace (`#A5701A`)**, **Default (`#96272B`)** are money-state colors and are reserved absolutely to that meaning. Paid is muted on purpose — a member meeting their obligation is the normal case, not an achievement. Grace is amber because it is a countdown, not a failure. Default is deep red rather than bright: it is a permanent record entry, and it should read as gravity rather than alarm.
+- **Paid (`#2E6B4F`)**, **Grace (`#6B4710`)**, **Default (`#96272B`)** are money-state colors and are reserved absolutely to that meaning. Paid is muted on purpose — a member meeting their obligation is the normal case, not an achievement. Grace is amber because it is a countdown, not a failure — but a *dark* amber, because it carries the grace banner's text and that text is held to AAA. A lighter amber was measured and rejected: it failed AA on every surface it appeared on. Default is deep red rather than bright: it is a permanent record entry, and it should read as gravity rather than alarm.
+
+**Measured contrast, load-bearing pairs.** Recorded because the commitments in `EXPERIENCE.md § Accessibility Floor` are unverifiable without numbers, and an unmeasured palette is how a failing colour reaches `final`:
+
+| Foreground on background | Ratio | Target |
+|---|---|---|
+| `ink-primary` on `surface-base` | 16.42:1 | AAA |
+| `accent` on `surface-raised`, and `ink-inverse` on `accent` | 9.35:1 | AAA |
+| `state-grace` on `state-grace-wash` | 7.51:1 | AAA — grace banner |
+| `state-grace` on `surface-raised` | 8.29:1 | AAA |
+| `state-default` on `state-default-wash` | 7.02:1 | AAA |
+| `state-paid` on `surface-raised` | 6.30:1 | AA |
+| `ink-secondary` on `surface-base` | 5.86:1 | AA |
+| `ink-disabled` on `surface-base` | 2.44:1 | exempt — genuinely disabled controls only, never de-emphasis |
 - **Grace Wash (`#FBF3E2`)** and **Default Wash (`#FAEDED`)** are the only background fills in the system, used exclusively behind the grace banner and a defaulted row.
 
 Never: teal as a status color, red for anything that is not a default or a destructive confirmation, green for anything that is not a settled contribution or payout, and any color at all on the trust-score history other than ink.
@@ -189,6 +210,7 @@ One family — the platform system stack — at six roles. A PWA renders in a br
 - **`body`** / **`body-strong`** — everything a member reads to make a decision. Never below 16px; this cohort includes people reading on cracked screens in poor light.
 - **`meta`** — timestamps, handles, secondary peso conversions, disclosure text. Never used for an amount the member must act on.
 - **`amount`** / **`amount-inline`** — every monetary figure, always with `tabular-nums`. Non-negotiable: the schedule is a column of amounts and dates, and proportional figures make a column of money unreadable at a glance.
+- **`handle`** — the member code, and nothing else. Tabular figures and a little letter-spacing, because it is a reference to be compared character by character rather than read as a word. Never used for prose.
 
 No all-caps labels, no letter-spaced small text, no decorative weights. Type scales with the browser's font-size setting; nothing is locked in `px` at the layout level.
 
@@ -220,7 +242,7 @@ No circles as surfaces, no pill-shaped buttons. Corners are soft enough to feel 
 - **Status pill** — outline only, never filled, colored by money state (`{colors.state-paid}`, `{colors.state-grace}`, `{colors.state-default}`, or `{colors.ink-secondary}` for pending). Text always carries the meaning; the color only reinforces it.
 - **Terms row** — label left in `{colors.ink-secondary}`, value right in `{typography.amount-inline}` at full ink, hairline divider beneath. The room terms screen is built entirely from these; it should read like a contract, because it is one.
 - **Schedule row** — one per round. Round number, date, recipient handle, amount. A 3px `{colors.accent}` marker on the leading edge of the current round; completed rounds carry a `{colors.state-paid}` pill; the member's own round is the only row set in `{typography.body-strong}`.
-- **Member status row** — handle left, status pill right. No avatars, no names, no photos — the product does not know members' legal identities and the UI should never imply otherwise.
+- **Member status row** — handle left in `{typography.handle}`, status pill right. No avatars, no names, no photos — the product does not know members' legal identities and the UI should never imply otherwise. The handle is a short alphanumeric code derived from the member's wallet address, set in two separated groups and drawn from an alphabet that excludes `0`/`O` and `1`/`I`; it reads as an account reference, not as a name the product gave someone.
 - **Trust score panel** — score in `{typography.display}`, a 6px track filled to score/1000 in `{colors.accent}`, and the derived consequence stated in `{typography.body}` beneath ("Your stake is 1.6× one contribution"). The panel always shows the number, the fill, and what the number *costs or saves* — never the number alone.
 - **Notice banner** — hairline border in the relevant state color over the matching wash. Two variants only: grace (amber) and default (red). No informational or success banners exist in the system.
 - **Disclosure block** — sunken background, `{typography.meta}` at full ink rather than secondary. Legal and FX text is small but never greyed out; low contrast on the FX disclosure would be a genuine problem, not a stylistic one.

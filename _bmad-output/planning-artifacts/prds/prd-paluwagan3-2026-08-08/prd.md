@@ -2,7 +2,7 @@
 title: "Pal3 — on-chain stablecoin savings circle"
 status: final
 created: 2026-08-08
-updated: 2026-08-08
+updated: 2026-08-12
 ---
 
 # PRD: Pal3
@@ -330,7 +330,8 @@ An Underwriter earns a fee on each Contribution, disclosed to Members before the
 A Member can connect a Stellar wallet from a mobile device and fund it with the Room's stablecoin.
 
 **Consequences (testable):**
-- Wallet connection is implemented through **WalletConnect**, not through a browser-extension API. This is a mobile-first requirement, not a preference: Soroban contract invocation requires `signAuthEntry`, and that path against Freighter Mobile must go through WalletConnect directly. An extension-only integration would work on desktop and fail on the product's primary surface.
+- Wallet connection is implemented through **WalletConnect**, not through a browser-extension API. This is a mobile-first requirement, not a preference: an extension-only integration would work on desktop and fail on the product's primary surface.
+- `[AMENDED 2026-08-12]` This requirement originally rested on a different rationale — that Soroban contract invocation requires `signAuthEntry`, and that reaching that path against Freighter Mobile forces integrating WalletConnect *directly*. Architecture decision **AD-15** supersedes it. Entry points are designed so the acting party is the transaction source, satisfied by a single `require_auth` on the invoker and by signing the transaction itself; no detached authorization entry is ever signed, so Pal3 stays on the mainstream Stellar Wallets Kit WalletConnect module rather than a bespoke integration. **The WalletConnect requirement stands unchanged; only its justification moved.** An implementer should build toward AD-15, not toward `signAuthEntry`.
 - At least one WalletConnect-compatible Stellar wallet is supported end to end. `[ASSUMPTION: Freighter via WalletConnect for V1]`
 - A Member with insufficient balance for Stake plus first Contribution is told the exact shortfall before attempting to join.
 
