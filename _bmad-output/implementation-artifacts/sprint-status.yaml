@@ -1,0 +1,114 @@
+# generated: 2026-08-13
+# last_updated: 2026-08-13
+# project: paluwagan3
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: {project-root}/_bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; sprint-status surfaces open ones
+
+generated: 2026-08-13
+last_updated: 2026-08-13
+project: paluwagan3
+project_key: NOKEY
+tracking_system: file-system
+story_location: "{project-root}/_bmad-output/implementation-artifacts"
+
+development_status:
+  # Epic 1: A verified member with a working wallet
+  epic-1: in-progress
+  1-1-project-scaffold-with-generated-contract-bindings: ready-for-dev
+  1-2-contract-test-harness-and-ci-pipeline: ready-for-dev
+  1-3-design-token-foundation-and-pwa-shell: backlog
+  1-4-registry-attestations-with-duplicate-rejection: backlog
+  1-5-starting-trust-score-from-verification-tier: backlog
+  1-6-kyc-provider-webhook-issues-attestations: backlog
+  1-7-wallet-connection-over-walletconnect: backlog
+  1-8-identity-verification-handoff-and-status: backlog
+  1-9-account-and-activity: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: A room you can read completely before you commit
+  epic-2: backlog
+  2-1-factory-deploys-a-room-with-validated-parameters: backlog
+  2-2-backstop-posting-gates-member-admission: backlog
+  2-3-underwriter-creates-a-room-and-posts-backstop: backlog
+  2-4-applicant-review-and-admission-on-pal3-history: backlog
+  2-5-member-join-with-score-snapshot-and-stake-lock: backlog
+  2-6-room-start-with-fairness-floor-ordering-and-frozen-parameters: backlog
+  2-7-open-window-cancellation-returns-everything-in-full: backlog
+  2-8-room-terms-disclosure-with-fx-acknowledgement: backlog
+  2-9-funding-check-and-single-signature-commit: backlog
+  2-10-room-filling-and-cancelled-states: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: A cycle that pays out on schedule — and covers a miss without anyone losing money
+  epic-3: backlog
+  3-1-per-round-contribution-escrow-with-underwriter-fee: backlog
+  3-2-permissionless-round-advance-with-full-pot-payout: backlog
+  3-3-grace-window-opens-on-a-missed-deadline-and-accepts-a-cure: backlog
+  3-4-atomic-slash-backstop-draw-and-payout-on-default: backlog
+  3-5-stake-exhaustion-removes-a-member-and-the-backstop-carries-them: backlog
+  3-6-room-close-returns-stakes-and-settles-the-underwriter: backlog
+  3-7-event-sourced-read-models-and-query-api: backlog
+  3-8-room-home-current-round-my-obligation-my-payout-date: backlog
+  3-9-contribute: backlog
+  3-10-members-status-list: backlog
+  3-11-grace-banner-and-the-highest-stakes-state-in-the-product: backlog
+  3-12-round-detail-default-resolved-and-removal: backlog
+  3-13-cycle-summary-at-room-close: backlog
+  3-14-underwriter-room-live-and-maximum-exposure: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Trust that compounds
+  epic-4: backlog
+  4-1-deterministic-versioned-trust-score-computation: backlog
+  4-2-registry-commit-between-rooms: backlog
+  4-3-trust-surface-score-consequence-and-every-event-that-moved-it: backlog
+  4-4-next-threshold-and-cycle-carry-forward: backlog
+  4-5-independent-score-reproduction: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Pilot readiness — testnet to mainnet
+  epic-5: backlog
+  5-1-contracts-published-under-apache-2-0-from-first-deployment: backlog
+  5-2-testnet-deployment-with-recorded-addresses: backlog
+  5-3-invariant-verification-against-the-three-load-bearing-claims: backlog
+  5-4-transaction-cost-measured-against-a-real-contribution: backlog
+  5-5-backstop-adequacy-verified-against-a-full-exposure-table: backlog
+  5-6-pre-mainnet-open-question-closure: backlog
+  5-7-audit-readiness-review-gates-the-mainnet-pilot: backlog
+  epic-5-retrospective: optional
